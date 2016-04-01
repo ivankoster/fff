@@ -139,7 +139,7 @@ end
 def define_reset_fake_helper
   putd ""
   putd "#define DEFINE_RESET_FUNCTION(FUNCNAME) \\"
-  putd "    void FUNCNAME##_reset(){ \\"
+  putd "    static void FUNCNAME##_reset(){ \\"
   putd "        memset(&FUNCNAME##_fake, 0, sizeof(FUNCNAME##_fake)); \\"
   putd "        FUNCNAME##_fake.arg_history_len = FFF_ARG_HISTORY_LEN;\\"
   putd "    }"
@@ -182,7 +182,7 @@ def output_macro(arg_count, has_varargs, is_value_function)
   output_macro_header(define_macro_name, saved_arg_count, has_varargs, return_type)
   pushd
     extern_c {
-      putd "FUNCNAME##_Fake FUNCNAME##_fake;\\"
+      putd "static FUNCNAME##_Fake FUNCNAME##_fake;\\"
       putd function_signature(saved_arg_count, has_varargs, is_value_function) + "{ \\"
       pushd
         output_function_body(saved_arg_count, has_varargs, is_value_function)
@@ -242,8 +242,6 @@ def output_variables(arg_count, has_varargs, is_value_function)
     putd "DECLARE_VALUE_FUNCTION_VARIABLES(RETURN_TYPE) \\" unless not is_value_function
     output_custom_function_signature(arg_count, has_varargs, is_value_function)
   }
-  putd "extern FUNCNAME##_Fake FUNCNAME##_fake;\\"
-  putd "void FUNCNAME##_reset(); \\"
 end
 
 #example: ARG0_TYPE arg0, ARG1_TYPE arg1
@@ -272,7 +270,7 @@ end
 def function_signature(arg_count, has_varargs, is_value_function)
   return_type = is_value_function ? "RETURN_TYPE" : "void"
   varargs = has_varargs ? ", ..." : ""
-  "#{return_type} FUNCNAME(#{arg_val_list(arg_count)}#{varargs})"
+  "static #{return_type} FUNCNAME(#{arg_val_list(arg_count)}#{varargs})"
 end
 
 def output_function_body(arg_count, has_varargs, is_value_function)
